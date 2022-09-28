@@ -128,31 +128,6 @@ exports.handler = async () => {
     }
     console.log(`Current chain block height is ${chainBlockHeight}`)
 
-    console.log('Identify best backup node')
-    // we find the highest priority, non-active (not associated), healthy backup node
-    let firstHealthyBackupNode: NodeState | undefined;
-    for (const networkID of nodeNetworkIDs) {
-      const node = nodeState[networkID]
-      if (!node) {
-        continue
-      }
-      node.challenge = await getChallenge(node.url, networkName)
-      if (!node.challenge) {
-        console.log(`Did not provide a valid challenge code: ${node.nodeName}`)
-        continue
-      }
-      if (node.block && node.block >= chainBlockHeight - blockLagThreshold && !node.active && !firstHealthyBackupNode) {
-        firstHealthyBackupNode = node
-      }
-    }
-    if (!firstHealthyBackupNode) {
-      console.error('Could not find a healthy backup node')
-      await notify('No healthy backup')
-      return;
-    }
-    console.log(`Selected backup node is ${firstHealthyBackupNode.nodeName}`)
-
-
     console.log('Identify which node is actively validating by querying every server')
     let activeNodeCount = 0
     // Query every server and record backup/validator status
@@ -180,6 +155,30 @@ exports.handler = async () => {
       //    Note that there are exceptions to this (e.g. Moonbeam) where 2 nodes may result in bad blocks due to the EVM consensus.
       // 2) On the other hand, the risk of mistakenly setting all nodes to backup will result to 0 blocks and must be minimized.
     }
+
+    console.log('Identify best backup node')
+    // we find the highest priority, non-active (not associated), healthy backup node
+    let firstHealthyBackupNode: NodeState | undefined;
+    for (const networkID of nodeNetworkIDs) {
+      const node = nodeState[networkID]
+      if (!node) {
+        continue
+      }
+      node.challenge = await getChallenge(node.url, networkName)
+      if (!node.challenge) {
+        console.log(`Did not provide a valid challenge code: ${node.nodeName}`)
+        continue
+      }
+      if (node.block && node.block >= chainBlockHeight - blockLagThreshold && !node.active && !firstHealthyBackupNode) {
+        firstHealthyBackupNode = node
+      }
+    }
+    if (!firstHealthyBackupNode) {
+      console.error('Could not find a healthy backup node')
+      await notify('No healthy backup')
+      return;
+    }
+    console.log(`Selected backup node is ${firstHealthyBackupNode.nodeName}`)
 
     if (activeNodeCount == 0) {
       console.log('No validator nodes found')
