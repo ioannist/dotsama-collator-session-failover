@@ -205,6 +205,7 @@ exports.handler = async () => {
           const res = await makeValidator(firstHealthyBackupNode.url, networkName, firstHealthyBackupNode.challenge)
           console.log(`Failover completed:\n${JSON.stringify(res)}`)
           await notify(`Failover completed`)
+          break
 
         } else {
           console.log('Node not found on telemetry or is lagging.')
