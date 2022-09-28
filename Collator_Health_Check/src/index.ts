@@ -182,10 +182,11 @@ exports.handler = async () => {
     }
 
     if (activeNodeCount == 0) {
-          const res = await makeValidator(firstHealthyBackupNode.url, networkName, firstHealthyBackupNode.challenge)
-          console.log(`Failover completed:\n${JSON.stringify(res)}`)
-          await notify(`Failover completed`)
-          return
+      console.log('No validator nodes found')
+      const res = await makeValidator(firstHealthyBackupNode.url, networkName, firstHealthyBackupNode.challenge)
+      console.log(`Failover completed:\n${JSON.stringify(res)}`)
+      await notify(`Failover completed`)
+      return
     }
 
     console.log('Compare block heights')
