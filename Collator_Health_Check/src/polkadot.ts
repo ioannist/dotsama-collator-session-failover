@@ -7,10 +7,11 @@ export async function providePolkadotApi() {
     let wsIndex = 0;
     while (true) {
         try {
-            const provider = new WsProvider(wsEndpoints[wsIndex % wsEndpoints.length]);
+            const rpc = wsEndpoints[wsIndex % wsEndpoints.length]
+            const provider = new WsProvider(rpc);
             await new Promise((resolve, reject) => {
                 provider.on('connected', () => resolve(true));
-                provider.on('disconnected', () => reject());
+                provider.on('disconnected', () => reject(`Failed to connect to: ${rpc}`));
             });
             api = await ApiPromise.create({
                 initWasm: false,
